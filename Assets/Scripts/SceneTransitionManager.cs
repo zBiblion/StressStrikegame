@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -13,8 +15,13 @@ public class SceneTransitionManager : MonoBehaviour
     [Tooltip("The color of the fade screen.")]
     public Color fadeColor = Color.black;
 
+    [Header("Main Menu")]
+    [SerializeField] private GameObject settingsPanel;
+
     private Canvas transitionCanvas;
     private Image fadeImage;
+    private bool settingsVisible;
+    private Coroutine settingsFadeRoutine;
 
     private void Awake()
     {
@@ -28,6 +35,12 @@ public class SceneTransitionManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        CacheSettingsPanel();
+        HideSettingsImmediate();
     }
 
     private void CreateTransitionUI()
@@ -76,6 +89,20 @@ public class SceneTransitionManager : MonoBehaviour
         StartCoroutine(TransitionToScene(sceneIndex));
     }
 
+    public void ToggleSettingsPanel()
+    {
+        CacheSettingsPanel();
+
+        if (settingsPanel == null)
+        {
+            Debug.LogWarning("Settings panel was not found in the loaded scene.");
+            return;
+        }
+
+        settingsVisible = !settingsVisible;
+        settingsPanel.SetActive(settingsVisible);
+    }
+
     private IEnumerator TransitionToScene(string sceneName)
     {
         // Fade to black (or chosen color)
@@ -122,5 +149,58 @@ public class SceneTransitionManager : MonoBehaviour
         {
             fadeImage.raycastTarget = false; // Allow UI interactions again once faded out
         }
+    }
+
+    private void CacheSettingsPanel()
+    {
+        if (settingsPanel != null)
+        {
+            return;
+        }
+
+        Scene activeScene = SceneManager.GetActiveScene();
+        if (!activeScene.IsValid() || !activeScene.isLoaded)
+        {
+            return;
+        }
+
+        foreach (GameObject root in activeScene.GetRootGameObjects())
+        {
+            settingsPanel = FindDeepChild(root.transform, "Settings")?.gameObject;
+            if (settingsPanel != null)
+            {
+                return;
+            }
+        }
+    }
+
+    private void HideSettingsImmediate()
+    {
+        if (settingsPanel == null)
+        {
+            return;
+        }
+
+        settingsVisible = false;
+        settingsPanel.SetActive(false);
+    }
+
+    private static Transform FindDeepChild(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName)
+            {
+                return child;
+            }
+
+            Transform found = FindDeepChild(child, childName);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
 }

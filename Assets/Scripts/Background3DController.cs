@@ -10,7 +10,7 @@ public class Background3DController : MonoBehaviour
     public Transform targetPunchBag;
 
     [Header("Stadium Visual Effects")]
-    public StadiumArenaGenerator stadium;
+    public GameObject stadium;
     public Color hitFlashColor = new Color(1f, 0.2f, 0.1f);
     public float hitFlashDuration = 0.15f;
 

@@ -11,9 +11,11 @@ public class MainMenuManager : MonoBehaviour
     private bool isPlayExpanded = false;
 
     [Header("Panels")]
+    public CanvasGroup settingsPanel;
     public CanvasGroup optionsPanel;
     public CanvasGroup storePanel;
     public CanvasGroup loginPanel;
+    private bool isSettingsOpen = false;
 
     [Header("Arena / Next Screen")]
     public CanvasGroup mainMenuCanvasGroup;
@@ -30,35 +32,26 @@ public class MainMenuManager : MonoBehaviour
         if (trainingButton != null) trainingButton.localScale = Vector3.zero;
 
         // Initialize panels state
+        HideSettingsImmediate();
         HideAllPanelsImmediate();
     }
 
     public void TogglePlayOptions()
     {
-        isPlayExpanded = !isPlayExpanded;
-        float duration = 0.3f;
+        ToggleSettingsPanel();
+    }
 
-        if (isPlayExpanded)
+    public void ToggleSettingsPanel()
+    {
+        isSettingsOpen = !isSettingsOpen;
+
+        if (isSettingsOpen)
         {
-            // Tween sub-buttons in
-            arenaButton.gameObject.SetActive(true);
-            trainingButton.gameObject.SetActive(true);
-            
-            // Move out and scale up
-            arenaButton.DOAnchorPos(new Vector2(150, 0), duration).SetEase(Ease.OutBack);
-            arenaButton.DOScale(1f, duration).SetEase(Ease.OutBack);
-
-            trainingButton.DOAnchorPos(new Vector2(300, 0), duration).SetEase(Ease.OutBack);
-            trainingButton.DOScale(1f, duration).SetEase(Ease.OutBack);
+            ShowPanel(settingsPanel);
         }
         else
         {
-            // Tween sub-buttons out
-            arenaButton.DOAnchorPos(Vector2.zero, duration).SetEase(Ease.InBack);
-            arenaButton.DOScale(0f, duration).SetEase(Ease.InBack).OnComplete(() => arenaButton.gameObject.SetActive(false));
-
-            trainingButton.DOAnchorPos(Vector2.zero, duration).SetEase(Ease.InBack);
-            trainingButton.DOScale(0f, duration).SetEase(Ease.InBack).OnComplete(() => trainingButton.gameObject.SetActive(false));
+            HidePanel(settingsPanel);
         }
     }
 
@@ -96,10 +89,20 @@ public class MainMenuManager : MonoBehaviour
         // SceneManager.LoadScene("ArenaScene");
     }
 
+    public void LoadArena()
+    {
+        StartArenaMatch();
+    }
+
     public void StartTrainingMatch()
     {
         Debug.Log("Starting Training Match! (Add your scene name here)");
         // SceneManager.LoadScene("TrainingScene");
+    }
+
+    public void LoadTraining()
+    {
+        StartTrainingMatch();
     }
 
     public void OpenOptions()
@@ -119,6 +122,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void CloseAllPanels()
     {
+        HidePanel(settingsPanel);
         HidePanel(optionsPanel);
         HidePanel(storePanel);
         HidePanel(loginPanel);
@@ -150,9 +154,19 @@ public class MainMenuManager : MonoBehaviour
 
     private void HideAllPanelsImmediate()
     {
+        if (settingsPanel) { settingsPanel.alpha = 0; settingsPanel.gameObject.SetActive(false); }
         if (optionsPanel) { optionsPanel.alpha = 0; optionsPanel.gameObject.SetActive(false); }
         if (storePanel) { storePanel.alpha = 0; storePanel.gameObject.SetActive(false); }
         if (loginPanel) { loginPanel.alpha = 0; loginPanel.gameObject.SetActive(false); }
+    }
+
+    private void HideSettingsImmediate()
+    {
+        if (!settingsPanel) return;
+        settingsPanel.alpha = 0;
+        settingsPanel.interactable = false;
+        settingsPanel.blocksRaycasts = false;
+        settingsPanel.gameObject.SetActive(false);
     }
 
     public void QuitGame()

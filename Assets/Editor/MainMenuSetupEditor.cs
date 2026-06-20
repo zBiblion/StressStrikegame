@@ -8,10 +8,10 @@ public class MainMenuSetupEditor : EditorWindow
     [MenuItem("Tools/Setup Main Menu UI")]
     public static void SetupUI()
     {
-        GameObject mainMenu = GameObject.Find("MainMenu");
+        GameObject mainMenu = GameObject.Find("MainMenu (important)") ?? GameObject.Find("MainMenu");
         if (mainMenu == null)
         {
-            Debug.LogError("Could not find a GameObject named 'MainMenu' in the scene.");
+            Debug.LogError("Could not find a GameObject named 'MainMenu (important)' or 'MainMenu' in the scene.");
             return;
         }
 
@@ -19,7 +19,7 @@ public class MainMenuSetupEditor : EditorWindow
         if (manager == null) manager = mainMenu.AddComponent<MainMenuManager>();
 
         // Find the original play button
-        Transform playTransform = mainMenu.transform.Find("play");
+        Transform playTransform = FindDeepChild(mainMenu.transform, "play");
         if (playTransform != null)
         {
             manager.playButton = playTransform.GetComponent<RectTransform>();
@@ -28,8 +28,8 @@ public class MainMenuSetupEditor : EditorWindow
             manager.arenaButton = CreateSubButton(playTransform, "arena", "ARENA", manager, "LoadArena");
             manager.trainingButton = CreateSubButton(playTransform, "training", "TRAINING", manager, "LoadTraining");
             
-            // Set Play button to TogglePlayOptions
-            ConvertObjectToButton(mainMenu.transform, "play", manager, "TogglePlayOptions");
+            // Set Play button to ToggleSettingsPanel
+            ConvertObjectToButton(playTransform, manager, "ToggleSettingsPanel");
         }
         else
         {
@@ -37,12 +37,13 @@ public class MainMenuSetupEditor : EditorWindow
         }
 
         // Convert the others
-        ConvertObjectToButton(mainMenu.transform, "options", manager, "OpenOptions");
-        ConvertObjectToButton(mainMenu.transform, "quit", manager, "QuitGame");
-        ConvertObjectToButton(mainMenu.transform, "store", manager, "OpenStore");
-        ConvertObjectToButton(mainMenu.transform, "login", manager, "OpenLogin");
+        ConvertObjectToButton(FindDeepChild(mainMenu.transform, "options"), manager, "OpenOptions");
+        ConvertObjectToButton(FindDeepChild(mainMenu.transform, "quit"), manager, "QuitGame");
+        ConvertObjectToButton(FindDeepChild(mainMenu.transform, "store"), manager, "OpenStore");
+        ConvertObjectToButton(FindDeepChild(mainMenu.transform, "login"), manager, "OpenLogin");
 
         // Create Panels
+        manager.settingsPanel = FindDeepChild(mainMenu.transform, "Settings")?.GetComponent<CanvasGroup>();
         manager.optionsPanel = CreatePanel(mainMenu.transform, "OptionsPanel", "OPTIONS MENU");
         manager.storePanel = CreatePanel(mainMenu.transform, "StorePanel", "STORE MENU");
         manager.loginPanel = CreatePanel(mainMenu.transform, "LoginPanel", "LOGIN MENU");
@@ -147,9 +148,8 @@ public class MainMenuSetupEditor : EditorWindow
         return cg;
     }
 
-    private static void ConvertObjectToButton(Transform parent, string childName, MainMenuManager manager, string methodName)
+    private static void ConvertObjectToButton(Transform childTransform, MainMenuManager manager, string methodName)
     {
-        Transform childTransform = parent.Find(childName);
         if (childTransform == null) return;
 
         GameObject childObj = childTransform.gameObject;
@@ -179,5 +179,24 @@ public class MainMenuSetupEditor : EditorWindow
             (UnityEngine.Events.UnityAction)System.Delegate.CreateDelegate(typeof(UnityEngine.Events.UnityAction), manager, methodName));
         
         img.raycastTarget = true;
+    }
+
+    private static Transform FindDeepChild(Transform parent, string name)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == name)
+            {
+                return child;
+            }
+
+            Transform found = FindDeepChild(child, name);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
 }
