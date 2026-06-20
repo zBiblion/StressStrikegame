@@ -62,7 +62,7 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    public void LoadArena()
+    public void OpenArenaMenu()
     {
         Debug.Log("Transitioning to Arena UI with Camera Animation...");
         
@@ -90,9 +90,15 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    public void LoadTraining()
+    public void StartArenaMatch()
     {
-        Debug.Log("Loading Training...");
+        Debug.Log("Starting Arena Match! (Add your scene name here)");
+        // SceneManager.LoadScene("ArenaScene");
+    }
+
+    public void StartTrainingMatch()
+    {
+        Debug.Log("Starting Training Match! (Add your scene name here)");
         // SceneManager.LoadScene("TrainingScene");
     }
 

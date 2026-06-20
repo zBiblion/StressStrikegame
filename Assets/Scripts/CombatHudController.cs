@@ -192,7 +192,7 @@ public class CombatHudController : MonoBehaviour
         switch (_currentStage)
         {
             case 1:
-                _opponentNameText.text = "Damien";
+                _opponentNameText.text = "Dummy";
                 if (_opponentPortraitImage != null) _opponentPortraitImage.sprite = _damienIcon;
                 break;
             case 2:
